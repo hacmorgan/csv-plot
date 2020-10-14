@@ -1,0 +1,10 @@
+[package]
+name = "csv-plot"
+version = "0.1.0"
+authors = ["hacmorgan <ham430@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+gnuplot = "0.0.37"
