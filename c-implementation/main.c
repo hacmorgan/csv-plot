@@ -6,14 +6,13 @@
 #define SLEEP_LGTH  3
 #define MAXLINE     1000
 
+
 /**
 
    csv-plot
    --------
 
    feed data from stdin to gnuplot using Nicolas Devillard's ANSI C interface
-
-   this is a work in progress, starting with blindly taking data as x,y and plotting it
 
 
    TODO
@@ -27,11 +26,23 @@
  */
 
 
+typedef struct List
+{
+    void *this;
+    void *next;
+} List;
+
 typedef struct Point
 {
     double xs;
     double ys;
-} Point;
+} Point; 
+
+typedef struct Data
+{
+    int indices[3];
+    Point *points;
+} Data;
 
 
 Point *accumulatePoint( char *fields, int accumulator_size )
