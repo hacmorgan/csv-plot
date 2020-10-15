@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "gnuplot_i.h"
+#include "csv-plot.h"
 
 #define SLEEP_LGTH  3
 #define MAXLINE     1000
@@ -26,23 +27,6 @@
  */
 
 
-typedef struct List
-{
-    void *this;
-    void *next;
-} List;
-
-typedef struct Point
-{
-    double xs;
-    double ys;
-} Point; 
-
-typedef struct Data
-{
-    int indices[3];
-    Point *points;
-} Data;
 
 
 Point *accumulatePoint( char *fields, int accumulator_size )
@@ -58,6 +42,21 @@ Point *accumulatePoint( char *fields, int accumulator_size )
     }
 
     free(points);
+}
+
+
+void help()
+{
+    fprintf( stderr,
+             "\
+\n                                                                      \
+Plot data from stdin using gnuplot (which must be installed) \n         \
+\n                                                                      \
+Options: \n                                                             \
+\t--help,-h: help \n                                                    \
+\t--fields,-f=<fields>: fields of interest \n                           \
+"
+             );
 }
 
 
