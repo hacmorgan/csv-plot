@@ -1,6 +1,10 @@
-use gnuplot::{ Figure, Caption, Color };
-use std::io::{ self, Read };
-use std::mem;  // for Box
+// use gnuplot::{ Figure, Caption, Color };
+// use std::io::{ self, Read };
+// use std::mem;  // for Box
+
+mod args;
+// mod stdin;
+// mod plot;
 
 
 /*
@@ -13,45 +17,17 @@ TODO:
  */
 
 
-struct Dataset
+pub struct Dataset
 {
-    x       : &[u32],
-    y       : &[u32],
-    color   : &[u8],  // &[u8] == &str
-}
-
-
-fn read_data() -> Box <Dataset>
-{
-    
-    let mut buffer = String::new();
-    let stdin = io::stdin();
-    stdin.read_to_string( &mut buffer );
-
-    Box::new( Dataset() )
-}
-
-
-fn plot( d : Dataset )
-{
-    ;
-    // let x : [u32; 3] = [ 0, 1, 2 ];
-    // let y : [u32; 3] = [ 3, 4, 5 ];
-
-    // let mut fg = Figure::new();
-
-    // fg.axes2d()
-    //     .lines(  &x,
-    //              &y,
-    //              &[Caption("A line"), Color("black")] );
-    // fg.show().unwrap();
+    columns : [ i8 ; 3 ],
+    points  : Vec < &'static [f32] >,
+    colour  : &'static [u8],  // &[u8] == &str
 }
 
 
 fn main()
 {
 
-    dset : Box <Dataset> = read_data();
-    plot( dset );
-    
+    let _d : Dataset = args::initialise();
+    println!( "Inferred columns: {:?}", _d.columns );
 }

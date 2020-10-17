@@ -1,0 +1,11 @@
+* csv-plot
+This program allows for the simple plotting of data from stdin, using a similar
+paradigm to that of the [[https://gitlab.com/orthographic/comma.git][comma utilities]].
+
+
+* Development Plan
+** DONE incorporate multiple files
+** DONE args.rs
+** TODO stdin.rs
+** TODO plot.rs
+*** TODO 

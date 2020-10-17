@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 gnuplot = "0.0.37"
+clap    = "2.33.3"
