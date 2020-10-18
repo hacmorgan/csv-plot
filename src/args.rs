@@ -9,9 +9,10 @@ pub fn initialise() -> Dataset
     let given_args = get_args();
     
     Dataset {
-        columns : infer_columns( given_args.value_of("fields").unwrap() ),
-        points  : vec![ &[3.0, 2.1], &[4.0, 2.2] ] ,
-        colour  : b"red"
+        columns          : infer_columns( given_args.value_of("fields").unwrap() ),
+        accumulator_size : 10,
+        points           : Vec::new() ,
+        colour           : b"red",
     }
 }
 
