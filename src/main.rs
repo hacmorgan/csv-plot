@@ -5,10 +5,10 @@ mod plot;
 
 pub struct Dataset
 {
-    columns          : [ i8 ; 3 ],
-    accumulator_size : u16,
-    points           : Vec < [ f32 ; 3 ] >,
-    colour           : &'static [u8],  // &[u8] == &str
+    columns           : [ i8 ; 3 ],
+    _accumulator_size : u16,
+    points            : Vec < [ f32 ; 3 ] >,
+    colour            : &'static str,
 }
 
 

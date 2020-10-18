@@ -9,21 +9,15 @@ accumulate: collect points on stdin, call update_plot() when buffer is full
 pub fn accumulate( mut data : Dataset ) 
 {
     let mut input = String::new();
-    let mut ax = plot::new_figure();
-    
-    for _i in 0..data.accumulator_size {
+    loop {
         match io::stdin().read_line( &mut input ) {
-            Ok(0)    => {  // EOF
-                plot::update_plot( &ax, data );
-                std::process::exit(0);
-            },
+            Ok(0)    => break,  // EOF
             Ok(_)    => data.points.push( get_points(&input, data.columns) ),
             Err(err) => eprintln!( "error: {:?}", err ),
         }
         input = "".to_string();
     }
-
-    plot::update_plot( &ax, data );
+    plot::update_plot( &data );
 }
 
 

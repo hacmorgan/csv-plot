@@ -1,23 +1,32 @@
 use gnuplot;
 use crate::Dataset;
-use std::convert::TryInto;
 
 
-pub fn new_figure() -> gnuplot::Axes2D
+// pub fn new_figure() -> &'static mut gnuplot::Figure
+// {
+//     // gnuplot::Figure::new().axes2d()
+//     gnuplot::Figure::new()
+// }
+
+// pub fn update_plot( ax : &gnuplot::Figure , data : Dataset )
+pub fn update_plot( data : &Dataset )
 {
-    gnuplot::Figure::new().axes2d()
+    let mut fg = gnuplot::Figure::new();
+    let ax = fg.axes2d();
+    let xs = to_vector( &data.points, 0 );
+    let ys = to_vector( &data.points, 1 );
+    ax.points( &xs, &ys, &[gnuplot::Color(data.colour)] );
+    match fg.show() {
+        Ok(_) => std::process::exit(0),
+        Err(err) => eprintln!( "error: {:?}", err ),
+    }
 }
 
-pub fn update_plot( ax : &gnuplot::Axes2d , data : Dataset )
+fn to_vector( points : &Vec < [ f32 ; 3 ] > , index : usize ) -> Vec < f32 >
 {
-    xs = to_vector();
-    ax.points();
-        
-    for i in 0..data.accumulator_size {
-        let index : usize = i.try_into().unwrap();
-        println!( "x: {}, y: {}, z: {}",
-                   data.points[index][0],
-                   data.points[index][1],
-                   data.points[index][2] );
+    let mut ret : Vec < f32 > = Vec::new();
+    for row in points {
+        ret.push( row[index] );
     }
+    ret
 }
