@@ -6,18 +6,25 @@ use crate::{ plot, Dataset };
 /**
 accumulate: collect points on stdin, call update_plot() when buffer is full
  */
-pub fn accumulate( mut data : Dataset ) 
+pub fn accumulate( mut datasets : Vec < Dataset > ) 
 {
+    fn push_points( line : &String , datasets : Vec < Dataset > )
+    {
+        for mut d in datasets {
+            d.points.push( get_points(&line, d.columns) );
+        }
+    }
+
     let mut input = String::new();
     loop {
         match io::stdin().read_line( &mut input ) {
             Ok(0)    => break,  // EOF
-            Ok(_)    => data.points.push( get_points(&input, data.columns) ),
+            Ok(_)    => push_points( &input, datasets ), 
             Err(err) => eprintln!( "error: {:?}", err ),
         }
         input = "".to_string();
     }
-    plot::update_plot( &data );
+    plot::update_plot( datasets );
 }
 
 

@@ -9,13 +9,17 @@ use crate::Dataset;
 // }
 
 // pub fn update_plot( ax : &gnuplot::Figure , data : Dataset )
-pub fn update_plot( data : &Dataset )
+pub fn update_plot( data : Vec < Dataset > )
 {
     let mut fg = gnuplot::Figure::new();
     let ax = fg.axes2d();
-    let xs = to_vector( &data.points, 0 );
-    let ys = to_vector( &data.points, 1 );
-    ax.points( &xs, &ys, &[gnuplot::Color(data.colour)] );
+
+    for d in data {
+        let xs = to_vector( &d.points, 0 );
+        let ys = to_vector( &d.points, 1 );
+        ax.points( &xs, &ys, &[gnuplot::Color(d.colour)] );
+    }
+    
     match fg.show() {
         Ok(_) => std::process::exit(0),
         Err(err) => eprintln!( "error: {:?}", err ),
