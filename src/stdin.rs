@@ -1,16 +1,16 @@
 use std::io;
 use std::convert::TryInto;
 
-use crate::{ plot, Dataset };
+use crate::Dataset;
 
 /**
 accumulate: collect points on stdin, call update_plot() when buffer is full
  */
-pub fn accumulate( mut datasets : Vec < Dataset > ) 
+pub fn accumulate( mut datasets : Vec < Dataset > ) -> Vec < Dataset >
 {
-    fn push_points( line : &String , datasets : Vec < Dataset > )
+    fn push_points( line : &String , datasets : &mut Vec < Dataset > )
     {
-        for mut d in datasets {
+        for d in datasets {
             d.points.push( get_points(&line, d.columns) );
         }
     }
@@ -19,12 +19,12 @@ pub fn accumulate( mut datasets : Vec < Dataset > )
     loop {
         match io::stdin().read_line( &mut input ) {
             Ok(0)    => break,  // EOF
-            Ok(_)    => push_points( &input, datasets ), 
+            Ok(_)    => push_points( &input, &mut datasets ), 
             Err(err) => eprintln!( "error: {:?}", err ),
         }
         input = "".to_string();
     }
-    plot::update_plot( datasets );
+    datasets
 }
 
 
@@ -51,7 +51,7 @@ fn get_points( line : &String , columns : [ i8 ; 3 ] ) -> [ f32 ; 3 ]
     
     let pts : Vec < &str > = line.trim().split(",").collect();
     let len : i8 = pts.len().try_into().unwrap();
-    let mut processed : [ f32 ; 3 ] = [ -1.0, -1.0, -1.0 ];
+    let mut processed : [ f32 ; 3 ] = [ 0.0, 0.0, 0.0 ];
 
     for i in 0..3 {
         let col = columns[i];

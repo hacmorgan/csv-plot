@@ -8,14 +8,14 @@ mod plot;
 csv-plot: plot data on stdin using gnuplot
 
  */
+
+
 /*
 TODO:
-- enable multiple datasets to be plotted
-  - data.points.push line in stdin.rs should become a function that handles 
-    multiple datasets
-- enable 3D plotting (update_plot() should handle this)
 - allow setting plot type and colour, marker etc
+- add verbose flag (read clap docs to see if this is already implemented)
 - add usage examples
+- allow multiple plots to be spawned
  */
 
 
@@ -30,10 +30,9 @@ pub struct Dataset
 
 fn main()
 {
+    let mut datasets : Vec < Dataset > = args::initialise();
 
-    let d : Vec < Dataset > = args::initialise();
-    // println!( "Inferred columns: {:?}", d.columns );
+    datasets = stdin::accumulate( datasets );
 
-    stdin::accumulate( d );
-    
+    plot::plot( datasets );
 }
