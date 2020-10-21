@@ -6,17 +6,25 @@ use crate::Dataset;
 
 pub fn initialise() -> Vec < Dataset >
 {
+    fn check_verbose( args : clap::ArgMatches< 'static > )
+    {
+        if let Some( arg ) = args.value_of("verbose") {
+            eprintln!("verbose not yet implemented");
+        }
+    }
+    
     let given_args = get_args();
     let fields = given_args.value_of("fields").unwrap();
+    let format = given_args.value_of("format").unwrap();
     let mut datasets : Vec < Dataset > = Vec::new();
     
     for x in find_xs( fields ) {
         datasets.push(
             Dataset {
-                columns : infer_columns( x, fields ),
+                columns           : infer_columns( x, fields ),
                 _accumulator_size : 10,
-                points : Vec::new(),
-                colour : "red",
+                points            : Vec::new(),
+                format            : find_format( x, format ),
             }
         )
     }
@@ -65,6 +73,15 @@ fn find_xs( fields : &str ) -> Vec < &str >
 }
 
 
+fn find_format( x : &str, format : &str ) -> &[gnuplot::PlotOption<&str>]
+{
+    fn parse_format( format : &str ) -> Vec < ( &str, &str ) >
+    {
+        ;
+    }
+}
+
+
 /** return column numbers for fields matching the pattern of x */
 fn infer_columns( x : &str , fields : &str ) -> [ i8 ; 3 ]
 {
@@ -107,5 +124,9 @@ fn get_args() -> clap::ArgMatches< 'static >
               .long("format")
               .help("plot style for each dataset")
               .takes_value(true) )
+        .arg( clap::Arg::with_name("verbose")
+              .short("v")
+              .long("verbose")
+              .help("more output")
         .get_matches()
 }

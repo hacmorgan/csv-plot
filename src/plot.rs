@@ -45,7 +45,7 @@ fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         eprintln!( "Got dataset with columns: {:?}", d.columns );
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
-        ax.points( &xs, &ys, &[gnuplot::Color(d.colour)] );
+        ax.points( &xs, &ys, d.format );
     }
 }
 
@@ -59,7 +59,7 @@ fn plot3d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
         let zs = to_vector( &d.points, 2 );
-        ax.points( &xs, &ys, &zs, &[gnuplot::Color(d.colour)] );
+        ax.points( &xs, &ys, &zs, d.format );
     }
 }
 

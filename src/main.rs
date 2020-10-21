@@ -13,7 +13,14 @@ csv-plot: plot data on stdin using gnuplot
 /*
 TODO:
 - allow setting plot type and colour, marker etc
-- add verbose flag (read clap docs to see if this is already implemented)
+  - parse_format() : create vector of tuples :: (x,format) such that a rectified
+    `x` can be matched against the first elem of tuple
+  - make rectify_x() function (e.g. x -> xa0, x2 -> xa2) 
+  - make function to turn `format` into &[gnuplot::PlotOptions<&str>]
+- add verbose flag 
+  - make sure it's possible to also check for the help flag
+  - display more detailed info on the formatiing of --fields and --format
+  - show examples
 - add usage examples
 - allow multiple plots to be spawned
  */
@@ -22,7 +29,7 @@ TODO:
 pub struct Dataset
 {
     columns           : [ i8 ; 3 ],
-    _accumulator_size : u16,
+    _accumulator_size : u16,  // not sure if accumulating input is feasible
     points            : Vec < [ f32 ; 3 ] >,
     colour            : &'static str,
 }
