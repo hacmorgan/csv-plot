@@ -73,7 +73,7 @@ fn find_xs( fields : &str ) -> Vec < &str >
 }
 
 
-fn find_format( x : &str, format : &str ) -> &[gnuplot::PlotOption<&str>]
+fn find_format( x : &str, format : &str ) -> &'static [gnuplot::PlotOption<&'static str>]
 {
     fn parse_format( format : &str ) -> Vec < ( &str, &str ) >
     {
@@ -82,7 +82,7 @@ fn find_format( x : &str, format : &str ) -> &[gnuplot::PlotOption<&str>]
 
     fn rectify_x( x : &str ) -> &str
     {
-        let mut rectified = Vec::new();
+        let mut rectified = String::new();
         let chars = x.chars();
 
         rectified.push( chars.next() );  // first is guaranteed to be x
@@ -97,7 +97,7 @@ fn find_format( x : &str, format : &str ) -> &[gnuplot::PlotOption<&str>]
         let next = chars.next();
         match next {
             Some(n) => rectified.push( n ),
-            None    => rectified.push( 0 ),
+            None    => rectified.push( '0' ),
         }
 
         rectified.as_str()
