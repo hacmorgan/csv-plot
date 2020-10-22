@@ -15,7 +15,7 @@ TODO:
 - allow setting plot type and colour, marker etc
   - parse_format() : create vector of tuples :: (x,format) such that a rectified
     `x` can be matched against the first elem of tuple
-  - make rectify_x() function (e.g. x -> xa0, x2 -> xa2) 
+  - fix rectify_x() function, doesn't handle x1 currently 
   - make function to turn `format` into &[gnuplot::PlotOptions<&str>]
 - add verbose flag 
   - make sure it's possible to also check for the help flag

@@ -79,6 +79,29 @@ fn find_format( x : &str, format : &str ) -> &[gnuplot::PlotOption<&str>]
     {
         ;
     }
+
+    fn rectify_x( x : &str ) -> &str
+    {
+        let mut rectified = Vec::new();
+        let chars = x.chars();
+
+        rectified.push( chars.next() );  // first is guaranteed to be x
+
+        let next = chars.next();
+        if next.is_alphabetic() {
+            rectified.push( next );
+        } else {
+            rectified.push( 'a' );
+        }
+
+        let next = chars.next();
+        match next {
+            Some(n) => rectified.push( n ),
+            None    => rectified.push( 0 ),
+        }
+
+        rectified.as_str()
+    }
 }
 
 
@@ -127,6 +150,6 @@ fn get_args() -> clap::ArgMatches< 'static >
         .arg( clap::Arg::with_name("verbose")
               .short("v")
               .long("verbose")
-              .help("more output")
+              .help("more output") )
         .get_matches()
 }
