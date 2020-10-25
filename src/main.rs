@@ -31,7 +31,7 @@ pub struct Dataset
     columns           : [ i8 ; 3 ],
     _accumulator_size : u16,  // not sure if accumulating input is feasible
     points            : Vec < [ f32 ; 3 ] >,
-    colour            : &'static str,
+    format            : &'static [gnuplot::PlotOption<&'static str>],
 }
 
 
