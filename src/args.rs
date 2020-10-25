@@ -73,7 +73,7 @@ fn find_xs( fields : &str ) -> Vec < &str >
 }
 
 
-fn find_format( x : &str, format : &str ) -> &'static [gnuplot::PlotOption<&'static str>]
+fn find_format( x : &str, format : &'static str ) -> &'static [gnuplot::PlotOption<&'static str>]
 {
     /** rectify dataset names and construct Vec < (name, format) > */
     fn parse_format( format : &str ) -> Vec < ( &str, &str ) >
@@ -147,21 +147,30 @@ fn find_format( x : &str, format : &str ) -> &'static [gnuplot::PlotOption<&'sta
         rectified.as_str()
     }
 
-    fn plot_options( format : &str ) -> Vec < gnuplot::PlotOption<&'static str> >
+    fn plot_options( dataset_format : &'static str ) -> Vec < gnuplot::PlotOption<&'static str> >
     {
         let mut plot_opts : Vec < gnuplot::PlotOption<&'static str> > = Vec::new();
-        for opt in format.split(",") {
-            match 
+        for opt in dataset_format.split(",") {
+            let name_value = opt.split("=");
+            if let (Some(name), Some(value)) = (name_value.next(), name_value.next()) {
+                match name {
+                    "colour"  => plot_opts.push( gnuplot::Color(value)   ),
+                    "caption" => plot_opts.push( gnuplot::Caption(value) ),
+                    &_        => (),
+                }
+            }
         }
+        return plot_opts
     }
 
     let format_vector : Vec < (&str, &str) > = parse_format( format );
     for dataset_format in format_vector {
         match dataset_format {
-            (x, f) => plot_options(f),
-            _      => continue,
+            (x, f) => return &plot_options(f),
         }
     }
+
+    &[]
 }
 
 
