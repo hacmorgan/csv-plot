@@ -75,9 +75,30 @@ fn find_xs( fields : &str ) -> Vec < &str >
 
 fn find_format( x : &str, format : &str ) -> &'static [gnuplot::PlotOption<&'static str>]
 {
+    /** rectify dataset names and construct Vec < (name, format) > */
     fn parse_format( format : &str ) -> Vec < ( &str, &str ) >
     {
-        ;
+        fn iter_to_str( iter : Vec < &str > ) -> &str
+        {
+            let flat = String::new();
+            for s in iter {
+                flat += s;
+            }
+            &flat
+        }
+        
+        let mut format_vector : Vec < (&str, &str) > = Vec::new();
+
+        for substring in format.split(";") {
+            let fields = substring.split(",");
+            if let Some(x) = fields.next() {
+                format_vector.push( (rectify_x(x), iter_to_str(fields.collect())) )
+            } else {
+                eprintln!("Received a bad input: {}", substring);
+            }
+        }
+        
+        format_vector
     }
 
     /** x -> xa0, x1 -> xa1, xb -> xb0 */
@@ -85,34 +106,61 @@ fn find_format( x : &str, format : &str ) -> &'static [gnuplot::PlotOption<&'sta
     {
         fn get_figure( x : &str ) -> char
         {
+            let c = x.chars().nth(1);
+            match c {
+                None    => 'a',
+                Some(c) => {
+                    if c.is_alphabetic() {
+                        c
+                    } else {
+                        'a'
+                    }
+                }
+            }
         }
 
         fn get_dataset( x : &str ) -> char
         {
+            let c1 = x.chars().nth(1);
+            let c2 = x.chars().nth(2);
+            if c1 == None && c2 == None {
+                '0'
+            } else if c2 == None {
+                let c = c2.unwrap();
+                if c.is_alphabetic() {
+                    '0'
+                } else {
+                    c
+                }
+            } else {
+                c2.unwrap()
+            }
         }
 
         let chars = x.chars();
+        let mut rectified = String::new();
         
-        rectified.push( chars.next().unwrap() );  // first is guaranteed to be x
-        rectified.push( get_figure(x) );      // dataset's letter
-        rectified.push( get_dataset(x) );     // dataset's number
-
-        // let next = chars.next();
-        // match next {
-        //     None => {
-        //         rectified.push( 'a' );
-        //         rectified.push( '0' );
-        //     },
-        //     Some(c) => {
-        //         if c.is_alphabetic() {
-        //             rectified.push( c );
-        //         } else {
-        //             rectified.push( 'a' );
-        //         }
-        //     },
-        // }
+        rectified.push( 'x'            );  // first is guaranteed to be x
+        rectified.push( get_figure(x)  );  // dataset's letter
+        rectified.push( get_dataset(x) );  // dataset's number
 
         rectified.as_str()
+    }
+
+    fn plot_options( format : &str ) -> Vec < gnuplot::PlotOption<&'static str> >
+    {
+        let mut plot_opts : Vec < gnuplot::PlotOption<&'static str> > = Vec::new();
+        for opt in format.split(",") {
+            match 
+        }
+    }
+
+    let format_vector : Vec < (&str, &str) > = parse_format( format );
+    for dataset_format in format_vector {
+        match dataset_format {
+            (x, f) => plot_options(f),
+            _      => continue,
+        }
     }
 }
 
