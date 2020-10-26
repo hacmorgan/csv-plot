@@ -45,7 +45,22 @@ fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         eprintln!( "Got dataset with columns: {:?}", d.columns );
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
-        ax.points( &xs, &ys, &gnuplot_options(d.format) );
+        let colour_string = get_colour(&d.format);
+        let colour = gnuplot::Color( &*colour_string );
+        let caption_string = get_caption(&d.format);
+        let caption = gnuplot::Caption( &*caption_string );
+        // let mut gnuplot_vec : Vec< gnuplot::PlotOption<&str> > = Vec::new();
+        // if let Some(f_vector) = d.format {
+        //     for (name, value) in f_vector {
+        //         let (name_str, value_str) : (&str, &str) = (&name, &value);
+        //         match name_str {
+        //             "colour"  => gnuplot_vec.push( gnuplot::Color(value_str) ),
+        //             "caption" => gnuplot_vec.push( gnuplot::Caption(value_str) ),
+        //             other     => eprintln!( "unknown format argument: {}", name ),
+        //         }
+        //     }
+        // }
+        ax.points( &xs, &ys, &[colour, caption] );
     }
 }
 
@@ -59,8 +74,50 @@ fn plot3d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
         let zs = to_vector( &d.points, 2 );
-        ax.points( &xs, &ys, &zs, &gnuplot_options(d.format) );
+        let colour_string = get_colour(&d.format);
+        let colour = gnuplot::Color( &*colour_string );
+        let caption_string = get_caption(&d.format);
+        let caption = gnuplot::Caption( &*caption_string );
+        // let mut gnuplot_vec : Vec< gnuplot::PlotOption<&str> > = Vec::new();
+        // if let Some(f_vector) = d.format {
+        //     for (name, value) in f_vector {
+        //         let (name_str, value_str) : (&str, &str) = (&name, &value);
+        //         match name_str {
+        //             "colour"  => gnuplot_vec.push( gnuplot::Color(value_str) ),
+        //             "caption" => gnuplot_vec.push( gnuplot::Caption(value_str) ),
+        //             other     => eprintln!( "unknown format argument: {}", name ),
+        //         }
+        //     }
+        // }
+        ax.points( &xs, &ys, &zs, &[colour, caption] );
+        // ax.points( &xs, &ys, &zs, &gnuplot_options(d.format) );
     }
+}
+
+
+fn get_colour( fmt : &Option< Vec< (String, String) > > ) -> String
+{
+    if let Some(fmt_vec) = fmt {
+        for (name, value) in fmt_vec {
+            if name == "colour" {
+                return value.to_string()
+            }
+        }
+    }
+    String::from("red")
+}
+
+
+fn get_caption( fmt : &Option< Vec< (String, String) > > ) -> String
+{
+    if let Some(fmt_vec) = fmt {
+        for (name, value) in fmt_vec {
+            if name == "caption" {
+                return value.to_string()
+            }
+        }
+    }
+    String::from("plot")
 }
 
 

@@ -5,7 +5,7 @@ use std::mem;
 use crate::Dataset;
 
 
-pub fn initialise() -> Vec < Dataset >
+pub fn initialise() -> ( clap::ArgMatches<'static>, Vec<Dataset> )
 {
     fn check_verbose( args : clap::ArgMatches< 'static > )
     {
@@ -14,9 +14,12 @@ pub fn initialise() -> Vec < Dataset >
         }
     }
     
-    let given_args = get_args();
+    let given_args = get_args().to_owned();
     let fields = given_args.value_of("fields").unwrap();
-    let format = given_args.value_of("format").unwrap();
+    let format = match given_args.value_of("format") {
+        Some(f) => f.to_owned(),
+        None    => String::from(""),
+    };
     let mut datasets : Vec < Dataset > = Vec::new();
     
     for x in find_xs( fields ) {
@@ -25,12 +28,12 @@ pub fn initialise() -> Vec < Dataset >
                 columns           : infer_columns( x, fields ),
                 _accumulator_size : 10,
                 points            : Vec::new(),
-                format            : find_format( x, format ),
+                format            : find_format( x, &format ),
             }
         )
     }
 
-    datasets
+    (given_args, datasets)
 }
 
 
@@ -74,15 +77,15 @@ fn find_xs( fields : &str ) -> Vec < &str >
 }
 
 
-fn find_format( x : &str, format : &'static str )
+fn find_format( x : &str, format : &String )
                 -> Option< Vec< (String, String) > >
 {
     /** rectify dataset names and construct Vec < (name, format) > */
-    fn parse_format( format : &str ) -> Vec < (String, String) >
+    fn parse_format( format : String ) -> Vec < (String, String) >
     {
         fn iter_to_str( iter : Vec < &str > ) -> String
         {
-            let flat = String::new();
+            let mut flat = String::new();
             for s in iter {
                 flat += s;
             }
@@ -92,7 +95,7 @@ fn find_format( x : &str, format : &'static str )
         let mut format_vector : Vec < (String, String) > = Vec::new();
 
         for substring in format.split(";") {
-            let fields = substring.split(",");
+            let mut fields = substring.split(",");
             if let Some(x) = fields.next() {
                 format_vector.push( (rectify_x(x), iter_to_str(fields.collect())) )
             } else {
@@ -128,7 +131,7 @@ fn find_format( x : &str, format : &'static str )
             if c1 == None && c2 == None {
                 '0'
             } else if c2 == None {
-                let c = c2.unwrap();
+                let c = c1.unwrap();
                 if c.is_alphabetic() {
                     '0'
                 } else {
@@ -161,10 +164,10 @@ fn find_format( x : &str, format : &'static str )
         plot_opts
     }
 
-    let format_vector : Vec < (String, String) > = parse_format( format );
-    for dataset_format in format_vector {
-        match dataset_format {
-            (x, f) => return Some( plot_options(f) ),
+    let format_vector : Vec < (String, String) > = parse_format( format.to_string() );
+    for (name, value) in format_vector {
+        if name == x {
+            return Some( plot_options(value) );
         }
     }
 

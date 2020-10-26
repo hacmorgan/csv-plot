@@ -35,7 +35,7 @@ pub struct Dataset
 
 fn main()
 {
-    let mut datasets : Vec < Dataset > = args::initialise();
+    let (args, mut datasets) : ( clap::ArgMatches<'static>, Vec<Dataset> ) = args::initialise();
 
     datasets = stdin::accumulate( datasets );
 
