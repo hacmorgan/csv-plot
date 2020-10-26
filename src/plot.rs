@@ -45,7 +45,7 @@ fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         eprintln!( "Got dataset with columns: {:?}", d.columns );
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
-        ax.points( &xs, &ys, d.format );
+        ax.points( &xs, &ys, &gnuplot_options(d.format) );
     }
 }
 
@@ -59,10 +59,9 @@ fn plot3d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
         let zs = to_vector( &d.points, 2 );
-        ax.points( &xs, &ys, &zs, d.format );
+        ax.points( &xs, &ys, &zs, &gnuplot_options(d.format) );
     }
 }
-
 
 
 fn to_vector( points : &Vec < [ f32 ; 3 ] > , index : usize ) -> Vec < f32 >
@@ -72,4 +71,24 @@ fn to_vector( points : &Vec < [ f32 ; 3 ] > , index : usize ) -> Vec < f32 >
         ret.push( row[index] );
     }
     ret
+}
+
+
+fn gnuplot_options( format : Option< Vec< (String, String) > > )
+                    -> Vec< gnuplot::PlotOption<String> >
+{
+    let mut gnuplot_vec : Vec< gnuplot::PlotOption<String> > = Vec::new();
+
+    if let Some(f_vector) = format {
+        for (name, value) in f_vector {
+            let name_str : &str = &name;
+            match name_str {
+                "colour"  => gnuplot_vec.push( gnuplot::Color(value) ),
+                "caption" => gnuplot_vec.push( gnuplot::Caption(value) ),
+                other     => eprintln!( "unknown format argument: {}", name ),
+            }
+        }
+    }
+
+    gnuplot_vec
 }

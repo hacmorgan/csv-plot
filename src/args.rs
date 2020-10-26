@@ -1,6 +1,7 @@
 extern crate clap;
 
 use std::convert::TryInto;
+use std::mem;
 use crate::Dataset;
 
 
@@ -73,21 +74,22 @@ fn find_xs( fields : &str ) -> Vec < &str >
 }
 
 
-fn find_format( x : &str, format : &'static str ) -> &'static [gnuplot::PlotOption<&'static str>]
+fn find_format( x : &str, format : &'static str )
+                -> Option< Vec< (String, String) > >
 {
     /** rectify dataset names and construct Vec < (name, format) > */
-    fn parse_format( format : &str ) -> Vec < ( &str, &str ) >
+    fn parse_format( format : &str ) -> Vec < (String, String) >
     {
-        fn iter_to_str( iter : Vec < &str > ) -> &str
+        fn iter_to_str( iter : Vec < &str > ) -> String
         {
             let flat = String::new();
             for s in iter {
                 flat += s;
             }
-            &flat
+            flat
         }
         
-        let mut format_vector : Vec < (&str, &str) > = Vec::new();
+        let mut format_vector : Vec < (String, String) > = Vec::new();
 
         for substring in format.split(";") {
             let fields = substring.split(",");
@@ -102,7 +104,7 @@ fn find_format( x : &str, format : &'static str ) -> &'static [gnuplot::PlotOpti
     }
 
     /** x -> xa0, x1 -> xa1, xb -> xb0 */
-    fn rectify_x( x : &str ) -> &str
+    fn rectify_x( x : &str ) -> String
     {
         fn get_figure( x : &str ) -> char
         {
@@ -144,33 +146,29 @@ fn find_format( x : &str, format : &'static str ) -> &'static [gnuplot::PlotOpti
         rectified.push( get_figure(x)  );  // dataset's letter
         rectified.push( get_dataset(x) );  // dataset's number
 
-        rectified.as_str()
+        rectified
     }
 
-    fn plot_options( dataset_format : &'static str ) -> Vec < gnuplot::PlotOption<&'static str> >
+    fn plot_options( dataset_format : String ) -> Vec< (String, String) >
     {
-        let mut plot_opts : Vec < gnuplot::PlotOption<&'static str> > = Vec::new();
+        let mut plot_opts : Vec< (String, String) > = Vec::new();
         for opt in dataset_format.split(",") {
-            let name_value = opt.split("=");
+            let mut name_value = opt.split("=");
             if let (Some(name), Some(value)) = (name_value.next(), name_value.next()) {
-                match name {
-                    "colour"  => plot_opts.push( gnuplot::Color(value)   ),
-                    "caption" => plot_opts.push( gnuplot::Caption(value) ),
-                    &_        => (),
-                }
+                plot_opts.push( (String::from(name), String::from(value)) );
             }
         }
-        return plot_opts
+        plot_opts
     }
 
-    let format_vector : Vec < (&str, &str) > = parse_format( format );
+    let format_vector : Vec < (String, String) > = parse_format( format );
     for dataset_format in format_vector {
         match dataset_format {
-            (x, f) => return &plot_options(f),
+            (x, f) => return Some( plot_options(f) ),
         }
     }
 
-    &[]
+    None
 }
 
 
