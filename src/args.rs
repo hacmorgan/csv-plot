@@ -4,7 +4,7 @@ use std::convert::TryInto;
 use crate::Dataset;
 
 
-pub fn initialise() -> Vec<Dataset>
+pub fn initialise() -> Vec< Dataset >
 {
     fn check_verbose( args : clap::ArgMatches< 'static > )
     {
@@ -19,15 +19,17 @@ pub fn initialise() -> Vec<Dataset>
         Some(f) => f.to_owned(),
         None    => String::from(""),
     };
+    let style = given_args.value_of("style").unwrap();
     let mut datasets : Vec< Dataset > = Vec::new();
     
     for x in find_xs( fields ) {
         datasets.push(
             Dataset {
-                columns           : infer_columns( x, fields ),
-                _accumulator_size : 10,
-                points            : Vec::new(),
-                format            : find_format( x, &format ),
+                columns           : infer_columns( x, fields ) ,
+                _accumulator_size : 10                         ,
+                points            : Vec::new()                 ,
+                style             : String::from( style )      ,
+                format            : find_format( x, &format )  ,
             }
         )
     }
@@ -163,7 +165,6 @@ fn find_format( x : &str, format : &String )
     }
 
     let format_vector : Vec < (String, String) > = parse_format( format.to_string() );
-    eprintln!( "format vector: {:?}", format_vector );
     for (name, value) in format_vector {
         if name == rectify_x(x) {
             return Some( plot_options(value) );
@@ -214,8 +215,13 @@ fn get_args() -> clap::ArgMatches< 'static >
         .arg( clap::Arg::with_name("format")
               .short("m")
               .long("format")
-              .help("plot style for each dataset")
+              .help("per-dataset style (e.g. colour, caption)")
               .takes_value(true) )
+        .arg( clap::Arg::with_name("style")
+              .short("s")
+              .long("style")
+              .help("style of entire plot, supports: points, lines")
+              .default_value("points") )
         .arg( clap::Arg::with_name("verbose")
               .short("v")
               .long("verbose")

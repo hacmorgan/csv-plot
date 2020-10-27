@@ -58,7 +58,14 @@ fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         let caption_string = get_caption( &d.format );
         let colour  = gnuplot::Color( &*colour_string );
         let caption = gnuplot::Caption( &*caption_string );
-        ax.points( &xs, &ys, &[colour, caption] );
+        match &*d.style {
+            "points" => ax.points( &xs, &ys, &[colour, caption] ),
+            "lines"  => ax.lines(  &xs, &ys, &[colour, caption] ),
+            _        => {
+                eprintln!( "error: --plot-style accepts only points or lines" );
+                std::process::exit(1);
+            },
+        };
     }
 }
 
@@ -76,30 +83,23 @@ fn plot3d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         let colour = gnuplot::Color( &*colour_string );
         let caption_string = get_caption(&d.format);
         let caption = gnuplot::Caption( &*caption_string );
-        ax.points( &xs, &ys, &zs, &[colour, caption] );
+        match &*d.style {
+            "points" => ax.points( &xs, &ys, &zs, &[colour, caption] ),
+            "lines"  => ax.lines(  &xs, &ys, &zs, &[colour, caption] ),
+            _        => {
+                eprintln!( "error: --plot-style accepts only points or lines" );
+                std::process::exit(1);
+            },
+        };
     }
 }
 
 
 fn get_colour( fmt : &Option< Vec< (String, String) > > ) -> String
 {
-    eprintln!("trying to match format: {:?}", fmt);
-    // match fmt {
-    //     Some(fmt_vec) => {
-    //         for (name, value) in fmt_vec {
-    //             if name == "colour" {
-    //                 eprintln!( "got a colour option!" );
-    //                 return value.to_string()
-    //             }
-    //         }
-    //     },
-    //     None          => (),
-    // }
     if let Some(fmt_vec) = fmt {
-        eprintln!("matched format");
         for (name, value) in fmt_vec {
             if name == "colour" {
-                eprintln!( "got a colour option!" );
                 return value.to_string()
             }
         }
