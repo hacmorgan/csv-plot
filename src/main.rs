@@ -12,15 +12,15 @@ csv-plot: plot data on stdin using gnuplot
 
 /*
 TODO:
-- allow setting plot type and colour, marker etc
-  - work out how to convert 
-    &[gnuplot::PlotOption<std::string::String>] -> &[gnuplot::PlotOption<&str>]
-- add verbose flag 
-  - make sure it's possible to also check for the help flag
-  - display more detailed info on the formatiing of --fields and --format
-  - show examples
-- add usage examples
 - allow multiple plots to be spawned
+- add --plot-style to allow lines instead of points
+- add verbose flag 
+  - print info on columns (this currently happens every time)
+  - if it's possible to check for help:
+    - display more detailed info on the formatting of --fields and --format
+    - show examples
+- add usage examples
+- investigate potentially moving gnuplot::PlotOption objects back out of plot.rs
  */
 
 
@@ -35,7 +35,7 @@ pub struct Dataset
 
 fn main()
 {
-    let (args, mut datasets) : ( clap::ArgMatches<'static>, Vec<Dataset> ) = args::initialise();
+    let mut datasets : Vec<Dataset> = args::initialise();
 
     datasets = stdin::accumulate( datasets );
 

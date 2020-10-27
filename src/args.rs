@@ -1,11 +1,10 @@
 extern crate clap;
 
 use std::convert::TryInto;
-use std::mem;
 use crate::Dataset;
 
 
-pub fn initialise() -> ( clap::ArgMatches<'static>, Vec<Dataset> )
+pub fn initialise() -> Vec<Dataset>
 {
     fn check_verbose( args : clap::ArgMatches< 'static > )
     {
@@ -14,13 +13,13 @@ pub fn initialise() -> ( clap::ArgMatches<'static>, Vec<Dataset> )
         }
     }
     
-    let given_args = get_args().to_owned();
+    let given_args = get_args();
     let fields = given_args.value_of("fields").unwrap();
     let format = match given_args.value_of("format") {
         Some(f) => f.to_owned(),
         None    => String::from(""),
     };
-    let mut datasets : Vec < Dataset > = Vec::new();
+    let mut datasets : Vec< Dataset > = Vec::new();
     
     for x in find_xs( fields ) {
         datasets.push(
@@ -33,7 +32,7 @@ pub fn initialise() -> ( clap::ArgMatches<'static>, Vec<Dataset> )
         )
     }
 
-    (given_args, datasets)
+    datasets
 }
 
 
@@ -88,6 +87,7 @@ fn find_format( x : &str, format : &String )
             let mut flat = String::new();
             for s in iter {
                 flat += s;
+                flat += ",";
             }
             flat
         }
@@ -142,9 +142,7 @@ fn find_format( x : &str, format : &String )
             }
         }
 
-        let chars = x.chars();
         let mut rectified = String::new();
-        
         rectified.push( 'x'            );  // first is guaranteed to be x
         rectified.push( get_figure(x)  );  // dataset's letter
         rectified.push( get_dataset(x) );  // dataset's number
@@ -165,8 +163,9 @@ fn find_format( x : &str, format : &String )
     }
 
     let format_vector : Vec < (String, String) > = parse_format( format.to_string() );
+    eprintln!( "format vector: {:?}", format_vector );
     for (name, value) in format_vector {
-        if name == x {
+        if name == rectify_x(x) {
             return Some( plot_options(value) );
         }
     }

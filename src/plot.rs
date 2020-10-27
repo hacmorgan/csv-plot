@@ -22,14 +22,23 @@ pub fn plot( data : Vec < Dataset > )
 
 fn highest_dimension( datasets : &Vec < Dataset > ) -> u8
 {
+    fn set_highest( highest : u8, new : u8 ) -> u8
+    {
+        if new > highest {
+            new
+        } else {
+            highest
+        }
+    }
+    
     let mut highest : u8 = 0;
     
     for d in datasets {
         match d.columns {
             [ -1, -1, -1 ] => continue,
-            [  _, -1, -1 ] => highest = 1,
-            [  _,  _, -1 ] => highest = 2,
-            [  _,  _,  _ ] => highest = 3,
+            [  _, -1, -1 ] => highest = set_highest( highest, 1 ),
+            [  _,  _, -1 ] => highest = set_highest( highest, 2 ),
+            [  _,  _,  _ ] => highest = set_highest( highest, 3 ),
         }
     }
 
@@ -45,21 +54,10 @@ fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         eprintln!( "Got dataset with columns: {:?}", d.columns );
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
-        let colour_string = get_colour(&d.format);
-        let colour = gnuplot::Color( &*colour_string );
-        let caption_string = get_caption(&d.format);
+        let colour_string  = get_colour( &d.format );
+        let caption_string = get_caption( &d.format );
+        let colour  = gnuplot::Color( &*colour_string );
         let caption = gnuplot::Caption( &*caption_string );
-        // let mut gnuplot_vec : Vec< gnuplot::PlotOption<&str> > = Vec::new();
-        // if let Some(f_vector) = d.format {
-        //     for (name, value) in f_vector {
-        //         let (name_str, value_str) : (&str, &str) = (&name, &value);
-        //         match name_str {
-        //             "colour"  => gnuplot_vec.push( gnuplot::Color(value_str) ),
-        //             "caption" => gnuplot_vec.push( gnuplot::Caption(value_str) ),
-        //             other     => eprintln!( "unknown format argument: {}", name ),
-        //         }
-        //     }
-        // }
         ax.points( &xs, &ys, &[colour, caption] );
     }
 }
@@ -78,28 +76,30 @@ fn plot3d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         let colour = gnuplot::Color( &*colour_string );
         let caption_string = get_caption(&d.format);
         let caption = gnuplot::Caption( &*caption_string );
-        // let mut gnuplot_vec : Vec< gnuplot::PlotOption<&str> > = Vec::new();
-        // if let Some(f_vector) = d.format {
-        //     for (name, value) in f_vector {
-        //         let (name_str, value_str) : (&str, &str) = (&name, &value);
-        //         match name_str {
-        //             "colour"  => gnuplot_vec.push( gnuplot::Color(value_str) ),
-        //             "caption" => gnuplot_vec.push( gnuplot::Caption(value_str) ),
-        //             other     => eprintln!( "unknown format argument: {}", name ),
-        //         }
-        //     }
-        // }
         ax.points( &xs, &ys, &zs, &[colour, caption] );
-        // ax.points( &xs, &ys, &zs, &gnuplot_options(d.format) );
     }
 }
 
 
 fn get_colour( fmt : &Option< Vec< (String, String) > > ) -> String
 {
+    eprintln!("trying to match format: {:?}", fmt);
+    // match fmt {
+    //     Some(fmt_vec) => {
+    //         for (name, value) in fmt_vec {
+    //             if name == "colour" {
+    //                 eprintln!( "got a colour option!" );
+    //                 return value.to_string()
+    //             }
+    //         }
+    //     },
+    //     None          => (),
+    // }
     if let Some(fmt_vec) = fmt {
+        eprintln!("matched format");
         for (name, value) in fmt_vec {
             if name == "colour" {
+                eprintln!( "got a colour option!" );
                 return value.to_string()
             }
         }
@@ -142,7 +142,7 @@ fn gnuplot_options( format : Option< Vec< (String, String) > > )
             match name_str {
                 "colour"  => gnuplot_vec.push( gnuplot::Color(value) ),
                 "caption" => gnuplot_vec.push( gnuplot::Caption(value) ),
-                other     => eprintln!( "unknown format argument: {}", name ),
+                _         => eprintln!( "unknown format argument: {}", name ),
             }
         }
     }
