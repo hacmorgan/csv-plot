@@ -54,15 +54,15 @@ fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         eprintln!( "Got dataset with columns: {:?}", d.columns );
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
-        let colour_string  = get_colour( &d.format );
-        let caption_string = get_caption( &d.format );
-        let colour  = gnuplot::Color( &*colour_string );
-        let caption = gnuplot::Caption( &*caption_string );
-        match &*d.style {
-            "points" => ax.points( &xs, &ys, &[colour, caption] ),
-            "lines"  => ax.lines(  &xs, &ys, &[colour, caption] ),
+        match &*get_plot_type( &d.style ) {
+            "points" => ax.points( &xs, &ys, 
+                                    &[gnuplot::Color(&*get_colour(&d.style)),
+                                      gnuplot::Caption(&*get_caption(&d.style))] ),
+            "lines" => ax.lines( &xs, &ys,
+                                    &[gnuplot::Color(&*get_colour(&d.style)),
+                                      gnuplot::Caption(&*get_caption(&d.style))] ),
             _        => {
-                eprintln!( "error: --plot-style accepts only points or lines" );
+                eprintln!( "error: \"type\" accepts only points or lines" );
                 std::process::exit(1);
             },
         };
@@ -70,7 +70,7 @@ fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
 }
 
 
-fn plot3d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
+fn plot3d( fg : &mut gnuplot::Figure , data : Vec< Dataset > )
 {
     let ax = fg.axes3d();
 
@@ -79,15 +79,15 @@ fn plot3d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
         let zs = to_vector( &d.points, 2 );
-        let colour_string = get_colour(&d.format);
-        let colour = gnuplot::Color( &*colour_string );
-        let caption_string = get_caption(&d.format);
-        let caption = gnuplot::Caption( &*caption_string );
-        match &*d.style {
-            "points" => ax.points( &xs, &ys, &zs, &[colour, caption] ),
-            "lines"  => ax.lines(  &xs, &ys, &zs, &[colour, caption] ),
+        match &*get_plot_type( &d.style ) {
+            "points" => ax.points( &xs, &ys, &zs,
+                                    &[gnuplot::Color(&*get_colour(&d.style)),
+                                      gnuplot::Caption(&*get_caption(&d.style))] ),
+            "lines" => ax.lines( &xs, &ys, &zs,
+                                    &[gnuplot::Color(&*get_colour(&d.style)),
+                                      gnuplot::Caption(&*get_caption(&d.style))] ),
             _        => {
-                eprintln!( "error: --plot-style accepts only points or lines" );
+                eprintln!( "error: \"type\" accepts only points or lines" );
                 std::process::exit(1);
             },
         };
@@ -95,10 +95,10 @@ fn plot3d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
 }
 
 
-fn get_colour( fmt : &Option< Vec< (String, String) > > ) -> String
+fn get_colour( style : &Option< Vec< (String, String) > > ) -> String
 {
-    if let Some(fmt_vec) = fmt {
-        for (name, value) in fmt_vec {
+    if let Some(style_vec) = style {
+        for (name, value) in style_vec {
             if name == "colour" {
                 return value.to_string()
             }
@@ -108,16 +108,29 @@ fn get_colour( fmt : &Option< Vec< (String, String) > > ) -> String
 }
 
 
-fn get_caption( fmt : &Option< Vec< (String, String) > > ) -> String
+fn get_caption( style : &Option< Vec< (String, String) > > ) -> String
 {
-    if let Some(fmt_vec) = fmt {
-        for (name, value) in fmt_vec {
+    if let Some(style_vec) = style {
+        for (name, value) in style_vec {
             if name == "caption" {
                 return value.to_string()
             }
         }
     }
     String::from("plot")
+}
+
+
+fn get_plot_type( style : &Option< Vec< (String, String) > > ) -> String
+{
+    if let Some(style_vec) = style {
+        for (name, value) in style_vec {
+            if name == "type" {
+                return value.to_string()
+            }
+        }
+    }
+    String::from("lines")
 }
 
 
@@ -131,18 +144,18 @@ fn to_vector( points : &Vec < [ f32 ; 3 ] > , index : usize ) -> Vec < f32 >
 }
 
 
-fn gnuplot_options( format : Option< Vec< (String, String) > > )
+fn gnuplot_options( style : Option< Vec< (String, String) > > )
                     -> Vec< gnuplot::PlotOption<String> >
 {
     let mut gnuplot_vec : Vec< gnuplot::PlotOption<String> > = Vec::new();
 
-    if let Some(f_vector) = format {
+    if let Some(f_vector) = style {
         for (name, value) in f_vector {
             let name_str : &str = &name;
             match name_str {
                 "colour"  => gnuplot_vec.push( gnuplot::Color(value) ),
                 "caption" => gnuplot_vec.push( gnuplot::Caption(value) ),
-                _         => eprintln!( "unknown format argument: {}", name ),
+                _         => eprintln!( "unknown style argument: {}", name ),
             }
         }
     }

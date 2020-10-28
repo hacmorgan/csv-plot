@@ -6,20 +6,28 @@ use crate::Dataset;
 
 pub fn initialise() -> Vec< Dataset >
 {
-    fn check_verbose( args : clap::ArgMatches< 'static > )
+    fn check_verbose( args : &clap::ArgMatches<'static> )
     {
         if let Some( arg ) = args.value_of("verbose") {
             eprintln!("verbose not yet implemented");
         }
     }
+
+    fn check_explain( args : &clap::ArgMatches<'static> )
+    {
+        if args.is_present( "explain" ) {
+            explain();
+            std::process::exit(0);
+        }
+    }
     
     let given_args = get_args();
+    check_explain( &given_args );
     let fields = given_args.value_of("fields").unwrap();
-    let format = match given_args.value_of("format") {
+    let style = match given_args.value_of("style") {
         Some(f) => f.to_owned(),
         None    => String::from(""),
     };
-    let style = given_args.value_of("style").unwrap();
     let mut datasets : Vec< Dataset > = Vec::new();
     
     for x in find_xs( fields ) {
@@ -28,8 +36,7 @@ pub fn initialise() -> Vec< Dataset >
                 columns           : infer_columns( x, fields ) ,
                 _accumulator_size : 10                         ,
                 points            : Vec::new()                 ,
-                style             : String::from( style )      ,
-                format            : find_format( x, &format )  ,
+                style             : find_style( x, &style )  ,
             }
         )
     }
@@ -78,11 +85,11 @@ fn find_xs( fields : &str ) -> Vec < &str >
 }
 
 
-fn find_format( x : &str, format : &String )
+fn find_style( x : &str, style : &String )
                 -> Option< Vec< (String, String) > >
 {
-    /** rectify dataset names and construct Vec < (name, format) > */
-    fn parse_format( format : String ) -> Vec < (String, String) >
+    /** rectify dataset names and construct Vec < (name, style) > */
+    fn parse_style( style : String ) -> Vec < (String, String) >
     {
         fn iter_to_str( iter : Vec < &str > ) -> String
         {
@@ -94,18 +101,18 @@ fn find_format( x : &str, format : &String )
             flat
         }
         
-        let mut format_vector : Vec < (String, String) > = Vec::new();
+        let mut style_vector : Vec < (String, String) > = Vec::new();
 
-        for substring in format.split(";") {
+        for substring in style.split(";") {
             let mut fields = substring.split(",");
             if let Some(x) = fields.next() {
-                format_vector.push( (rectify_x(x), iter_to_str(fields.collect())) )
+                style_vector.push( (rectify_x(x), iter_to_str(fields.collect())) )
             } else {
                 eprintln!("Received a bad input: {}", substring);
             }
         }
         
-        format_vector
+        style_vector
     }
 
     /** x -> xa0, x1 -> xa1, xb -> xb0 */
@@ -152,10 +159,10 @@ fn find_format( x : &str, format : &String )
         rectified
     }
 
-    fn plot_options( dataset_format : String ) -> Vec< (String, String) >
+    fn plot_options( dataset_style : String ) -> Vec< (String, String) >
     {
         let mut plot_opts : Vec< (String, String) > = Vec::new();
-        for opt in dataset_format.split(",") {
+        for opt in dataset_style.split(",") {
             let mut name_value = opt.split("=");
             if let (Some(name), Some(value)) = (name_value.next(), name_value.next()) {
                 plot_opts.push( (String::from(name), String::from(value)) );
@@ -164,8 +171,8 @@ fn find_format( x : &str, format : &String )
         plot_opts
     }
 
-    let format_vector : Vec < (String, String) > = parse_format( format.to_string() );
-    for (name, value) in format_vector {
+    let style_vector : Vec < (String, String) > = parse_style( style.to_string() );
+    for (name, value) in style_vector {
         if name == rectify_x(x) {
             return Some( plot_options(value) );
         }
@@ -203,28 +210,47 @@ fn infer_columns( x : &str , fields : &str ) -> [ i8 ; 3 ]
 fn get_args() -> clap::ArgMatches< 'static > 
 {
     clap::App::new( "csv-plot" )
-        .version( "0.0" )
+        .version( "0.1" )
         .author( "Hamish Morgan" )
-        .about( "plot data from stdin using gnuplot" )
+        .about( "\nplot data from stdin using gnuplot" )
         .arg( clap::Arg::with_name("fields")
               .short("f")
               .long("fields")
-              .help("format of data on stdin")
+              .help("style of data on stdin")
               .takes_value(true)
               .default_value("x,y") )
-        .arg( clap::Arg::with_name("format")
-              .short("m")
-              .long("format")
-              .help("per-dataset style (e.g. colour, caption)")
-              .takes_value(true) )
         .arg( clap::Arg::with_name("style")
               .short("s")
               .long("style")
-              .help("style of entire plot, supports: points, lines")
-              .default_value("points") )
+              .help("per-dataset style (e.g. colour, caption)")
+              .takes_value(true) )
         .arg( clap::Arg::with_name("verbose")
               .short("v")
               .long("verbose")
               .help("more output") )
+        .arg( clap::Arg::with_name("explain")
+              .short("e")
+              .long("explain")
+              .help("print usage examples and more detailed explanations") )
         .get_matches()
+}
+
+
+fn explain()
+{
+    eprintln!( "SPECIFYING INPUT COLUMNS (--fields)"                                );
+    eprintln!( "csv-plot can plot in 2D or 3D, and will automatically choose based" );
+    eprintln!( "on the specified input columns."                                    );
+    eprintln!(                                                                      );
+    eprintln!( "SPECIFYING THE STYLE OF A DATASET (--style)"                       );
+    eprintln!( "A dataset's x label is used to specify its style settings, as  "   );
+    eprintln!( "<xlabel>,<option>,<option>;<xlabel>,<option>"                       );
+    eprintln!(                                                                      );
+    eprintln!( "EXAMPLES"                                                           );
+    eprintln!( "plot two sets of 2D data in red and blue"                           );
+    eprintln!( "    cat data.csv | csv-plot --fields \"x0,y0,x1,y1\" \\"            );
+    eprintln!( "        --style \"x0,colour=red;x1,colour=blue\""                  );
+    eprintln!( "plot three 3D datasets, give each a caption and colour one of them" );
+    eprintln!( "    cat data.csv | csv-plot --fields \"x,x1,x2,y,y1,y2,z,z1,z2\"\\" );
+    eprintln!( "        --style \"x,caption=good;x1,caption=bad;x2,caption=okay\"" );
 }

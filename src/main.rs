@@ -13,6 +13,8 @@ csv-plot: plot data on stdin using gnuplot
 /*
 TODO:
 - allow multiple plots to be spawned
+- change format to style
+- allow per-plot legend, xlabel, ylabel
 - add verbose flag 
   - print info on columns (this currently happens every time)
   - if it's possible to check for help:
@@ -31,8 +33,7 @@ pub struct Dataset
     columns           : [ i8 ; 3 ]                        ,
     _accumulator_size : u16                               ,
     points            : Vec< [ f32 ; 3 ] >                ,
-    style             : String                            ,
-    format            : Option< Vec< (String, String) > > ,
+    style             : Option< Vec< (String, String) > > ,
 }
 
 
