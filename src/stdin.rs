@@ -28,18 +28,6 @@ pub fn accumulate( mut datasets : Vec < Dataset > ) -> Vec < Dataset >
 }
 
 
-fn accumulator_size( data : &Vec< Dataset > ) -> u16
-{
-    match data.iter().next() {
-        Some(d) => d.accumulator_size,
-        None    => {
-            eprintln!( "error: no datasets supplied" );
-            std::process::exit(1);
-        },
-    }
-}
-
-
 fn get_points( line : &String , columns : [ i8 ; 3 ] ) -> [ f32 ; 3 ]
 {
     fn invalid_index_error( col : i8 , pts_len : i8 )

@@ -259,6 +259,40 @@ fn get_args() -> clap::ArgMatches< 'static >
 
 fn explain()
 {
+    let help = "
+SPECIFYING INPUT COLUMNS (--fields)
+csv-plot can plot in 2D and 3D, and will automatically choose based on the given
+input columns. These are specified via a comma-separated list of strings, known 
+as `column-specifiers`.
+
+Column-specifiers are three characters long, but can be abbreviated for 
+convenience. 
+- The first character specifies the axis, so can only b x, y, or z
+  - At least this field is required.
+- The second is an integer which allows multiple datasets to be drawn on the 
+  same plot. 
+  - Default: 0
+- The third is a character [a-z] which can be used to draw multiple plots from
+  a single invocation of csv-plot.
+  - Default: a   
+
+
+PARSING MULTIPLE OPTIONS IN ONE STRING
+In order to specify options for multiple datasets, the following grammar is used
+to parse options for --style and --plot-settings:
+
+    <xlabel>,<option>[,<option>];<xlabel>,<option>
+
+- each option is of the form <name>=<value>
+- multiple comma-separated options can be specified per xlabel
+- multiple semicolon-separated sets of xlabels and options can be specified
+- a dataset's x label is the string used to specify the column for its x values
+  for --fields, e.g. xa0
+
+
+
+";
+    eprintln!( "{}", help );
     eprintln!( "SPECIFYING INPUT COLUMNS (--fields)"                                );
     eprintln!( "csv-plot can plot in 2D or 3D, and will automatically choose based" );
     eprintln!( "on the specified input columns."                                    );

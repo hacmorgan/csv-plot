@@ -12,7 +12,6 @@ csv-plot: plot data on stdin using gnuplot
 
 /*
 TODO:
-- accumulate data
 - add verbose flag 
   - print info on columns (this currently happens every time)
   - if it's possible to check for help:
