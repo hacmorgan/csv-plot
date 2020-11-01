@@ -4,7 +4,7 @@ use crate::Dataset;
 
 
 /** plot: split datasets up by plot, and call plotting routine for each */
-pub fn plot( data : Vec< Dataset > )
+pub fn plot( data : &Vec< Dataset > )
 {
     fn plot_dataset( dataset : Vec< Dataset > )
     {
@@ -48,7 +48,7 @@ pub fn plot( data : Vec< Dataset > )
         plots
     }
 
-    for plt in separate_by_plot( data ) {
+    for plt in separate_by_plot( *data ) {
         plot_dataset( plt );
     }
 }

@@ -6,8 +6,8 @@ use crate::Dataset;
 /**
 accumulate: collect points on stdin, call update_plot() when buffer is full
  */
-// pub fn accumulate( mut datasets : Vec < Dataset > ) -> Option< Vec < Dataset > >
-pub fn accumulate( mut datasets : Vec < Dataset > ) -> Vec < Dataset >
+// pub fn accumulate( mut datasets : Vec < Dataset > ) -> Vec < Dataset >
+pub fn accumulate( mut datasets : &mut Vec < Dataset > ) -> Option< &mut Vec < Dataset > >
 {
     fn push_points( line : &String , datasets : &mut Vec < Dataset > )
     {
@@ -17,24 +17,24 @@ pub fn accumulate( mut datasets : Vec < Dataset > ) -> Vec < Dataset >
     }
 
     let mut input = String::new();
-    loop {
-        match io::stdin().read_line( &mut input ) {
-            Ok(0)    => break,  // EOF
-            Ok(_)    => push_points( &input, &mut datasets ), 
-            Err(err) => eprintln!( "error: {:?}", err ),
-        }
-        input = "".to_string();
-    }
-    datasets
-    // for i in 1..accumulator_size( &datasets ) {
+    // loop {
     //     match io::stdin().read_line( &mut input ) {
-    //         Ok(0)    => return None,  // EOF
+    //         Ok(0)    => break,  // EOF
     //         Ok(_)    => push_points( &input, &mut datasets ), 
     //         Err(err) => eprintln!( "error: {:?}", err ),
     //     }
     //     input = "".to_string();
     // }
-    // Some( datasets )
+    // datasets
+    for i in 1..accumulator_size( &datasets ) {
+        match io::stdin().read_line( &mut input ) {
+            Ok(0)    => return None,  // EOF
+            Ok(_)    => push_points( &input, &mut datasets ), 
+            Err(err) => eprintln!( "error: {:?}", err ),
+        }
+        input = "".to_string();
+    }
+    Some( &mut datasets )
 }
 
 

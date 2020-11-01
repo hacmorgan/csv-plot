@@ -39,11 +39,11 @@ fn main()
 {
     let mut datasets : Vec<Dataset> = args::initialise();
 
-    datasets = stdin::accumulate( datasets );
+    // datasets = stdin::accumulate( datasets );
 
-    // while let Some(datasets) = stdin::accumulate( datasets ) {
-    //     plot::plot( datasets );
-    // }
+    while let Some(datasets) = stdin::accumulate( &mut datasets ) {
+        plot::plot( &datasets );
+    }
 
-    plot::plot( datasets );
+    // plot::plot( datasets );
 }
