@@ -1,10 +1,11 @@
 use gnuplot;
 use gnuplot::AxesCommon;
 use crate::Dataset;
+use std::thread;
 
 
 /** plot: split datasets up by plot, and call plotting routine for each */
-pub fn plot( data : &Vec< Dataset > )
+pub fn plot( data : Vec< Dataset > )
 {
     fn plot_dataset( dataset : Vec< Dataset > )
     {
@@ -17,7 +18,7 @@ pub fn plot( data : &Vec< Dataset > )
             plot3d( &mut fg, dataset );
         }
         
-        match fg.show_and_keep_running() {
+        match fg.show() {
             Ok(_) => (),
             Err(err) => eprintln!( "error: {:?}", err ),
         }
@@ -48,8 +49,16 @@ pub fn plot( data : &Vec< Dataset > )
         plots
     }
 
-    for plt in separate_by_plot( *data ) {
-        plot_dataset( plt );
+    let mut children : Vec< std::thread::JoinHandle<()> > = Vec::new();
+    for plt in separate_by_plot( data ) {
+        children.push(
+            thread::spawn( move || {
+                plot_dataset( plt );
+            } )
+        );
+    }
+    for child in children {
+        let _ = child.join();
     }
 }
 
