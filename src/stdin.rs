@@ -6,6 +6,7 @@ use crate::Dataset;
 /**
 accumulate: collect points on stdin, call update_plot() when buffer is full
  */
+// pub fn accumulate( mut datasets : Vec < Dataset > ) -> Option< Vec < Dataset > >
 pub fn accumulate( mut datasets : Vec < Dataset > ) -> Vec < Dataset >
 {
     fn push_points( line : &String , datasets : &mut Vec < Dataset > )
@@ -25,6 +26,27 @@ pub fn accumulate( mut datasets : Vec < Dataset > ) -> Vec < Dataset >
         input = "".to_string();
     }
     datasets
+    // for i in 1..accumulator_size( &datasets ) {
+    //     match io::stdin().read_line( &mut input ) {
+    //         Ok(0)    => return None,  // EOF
+    //         Ok(_)    => push_points( &input, &mut datasets ), 
+    //         Err(err) => eprintln!( "error: {:?}", err ),
+    //     }
+    //     input = "".to_string();
+    // }
+    // Some( datasets )
+}
+
+
+fn accumulator_size( data : &Vec< Dataset > ) -> u16
+{
+    match data.iter().next() {
+        Some(d) => d.accumulator_size,
+        None    => {
+            eprintln!( "error: no datasets supplied" );
+            std::process::exit(1);
+        },
+    }
 }
 
 
