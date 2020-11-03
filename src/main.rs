@@ -12,12 +12,6 @@ csv-plot: plot data on stdin using gnuplot
 
 /*
 TODO:
-- add verbose flag 
-  - print info on columns (this currently happens every time)
-  - if it's possible to check for help:
-    - display more detailed info on the formatting of --fields and --format
-    - show examples
-- add usage examples
 - add binary data support
  */
 
@@ -36,9 +30,9 @@ pub struct Dataset
 
 fn main()
 {
-    let mut datasets : Vec<Dataset> = args::initialise();
+    let (mut datasets, verbose) = args::initialise();
 
     datasets = stdin::accumulate( datasets );
 
-    plot::plot( datasets );
+    plot::plot( datasets, verbose );
 }

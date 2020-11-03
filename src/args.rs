@@ -4,12 +4,14 @@ use std::convert::TryInto;
 use crate::Dataset;
 
 
-pub fn initialise() -> Vec< Dataset >
+pub fn initialise() -> (Vec< Dataset >, bool)
 {
-    fn check_verbose( args : &clap::ArgMatches<'static> )
+    fn check_verbose( args : &clap::ArgMatches<'static> ) -> bool
     {
-        if let Some( arg ) = args.value_of("verbose") {
-            eprintln!("verbose not yet implemented");
+        if args.is_present("verbose") {
+            true
+        } else {
+            false
         }
     }
 
@@ -48,7 +50,7 @@ pub fn initialise() -> Vec< Dataset >
         );
     }
 
-    datasets
+    (datasets, check_verbose(&given_args))
 }
 
 
@@ -226,7 +228,7 @@ fn find_plot( x : &str ) -> char
 fn get_args() -> clap::ArgMatches< 'static > 
 {
     clap::App::new( "csv-plot" )
-        .version( "0.1" )
+        .version( "1.0" )
         .author( "Hamish Morgan" )
         .about( "\nplot data from stdin using gnuplot" )
         .arg( clap::Arg::with_name("fields")
@@ -267,45 +269,69 @@ as `column-specifiers`.
 
 Column-specifiers are three characters long, but can be abbreviated for 
 convenience. 
-- The first character specifies the axis, so can only b x, y, or z
-  - At least this field is required.
-- The second is an integer which allows multiple datasets to be drawn on the 
-  same plot. 
-  - Default: 0
-- The third is a character [a-z] which can be used to draw multiple plots from
-  a single invocation of csv-plot.
-  - Default: a   
+1. The first character specifies the axis, so can only be x, y, or z
+   - This character is mandatory
+2. The second is a character [a-z] which can be used to draw multiple plots from
+   a single invocation of csv-plot.
+   - Default: a   
+3. The third is an integer which allows multiple datasets to be drawn on the 
+   same plot. 
+   - Default: 0
+
+Abbreviation examples:
+- x  = xa0
+- y1 = ya1
+- zb = zb0
 
 
 PARSING MULTIPLE OPTIONS IN ONE STRING
 In order to specify options for multiple datasets, the following grammar is used
 to parse options for --style and --plot-settings:
 
-    <xlabel>,<option>[,<option>];<xlabel>,<option>
+    <dlabel>,<option>[,<option>];<dlabel>,<option>
 
-- each option is of the form <name>=<value>
+- a dataset's <dlabel> is the column specifier for its x data
+- each <option> is of the form <name>=<value>
 - multiple comma-separated options can be specified per xlabel
 - multiple semicolon-separated sets of xlabels and options can be specified
-- a dataset's x label is the string used to specify the column for its x values
-  for --fields, e.g. xa0
 
 
+PER-DATASET SETTINGS (--style)
+- colour=<colour>; colour of line or points 
+  - accepts common colours such as `red`, or hexadecimal codes
+  - default: `red`
+- type=<type>; plot type
+  - accepts `lines` or `points`
+  - default: `lines`
+- caption=<caption>; name of the dataset (displayed in the legend)
+  - default: \"\" (none)
 
+
+PER-PLOT SETTINGS (--plot-options)
+- title=<title>; plot title
+- xlabel=<xlabel>; label for the x-axis
+- ylabel=<ylabel>; label for the y-axis
+- zlabel=<zlabel>; label for the z-axis (if 3D data is present)
+
+
+EXAMPLES
+plot two sets of 2D data in red and blue
+    cat data.csv \\
+        | csv-plot --fields \"x0,y0,x1,y1\" \\
+                   --style \"x0,colour=red;x1,colour=blue\"
+
+plot three 3D datasets, give each a caption and colour one of them
+    cat data.csv \\
+        | csv-plot --fields \"x,x1,x2,y,y1,y2,z,z1,z2\" \\
+                   --style \"x,caption=foo;x1,caption=bar;x2,caption=baz, \\
+                             colour=brown\"
+
+plot a scatter plot using data from the 2nd and 5th comma-separated columns, and
+label the axes
+    cat data.csv \\
+        | csv-plot --fields \",x,,,y\" \\
+                   --style \"x,type=points\" \\
+                   --plot-options \"xa0,xlabel=some x data,ylabel=some y data\"
 ";
     eprintln!( "{}", help );
-    eprintln!( "SPECIFYING INPUT COLUMNS (--fields)"                                );
-    eprintln!( "csv-plot can plot in 2D or 3D, and will automatically choose based" );
-    eprintln!( "on the specified input columns."                                    );
-    eprintln!(                                                                      );
-    eprintln!( "SPECIFYING THE STYLE OF A DATASET (--style)"                       );
-    eprintln!( "A dataset's x label is used to specify its style settings, as  "   );
-    eprintln!( "<xlabel>,<option>[,<option>];<xlabel>,<option>"                     );
-    eprintln!(                                                                      );
-    eprintln!( "EXAMPLES"                                                           );
-    eprintln!( "plot two sets of 2D data in red and blue"                           );
-    eprintln!( "    cat data.csv | csv-plot --fields \"x0,y0,x1,y1\" \\"            );
-    eprintln!( "        --style \"x0,colour=red;x1,colour=blue\""                  );
-    eprintln!( "plot three 3D datasets, give each a caption and colour one of them" );
-    eprintln!( "    cat data.csv | csv-plot --fields \"x,x1,x2,y,y1,y2,z,z1,z2\"\\" );
-    eprintln!( "        --style \"x,caption=good;x1,caption=bad;x2,caption=okay\"" );
 }

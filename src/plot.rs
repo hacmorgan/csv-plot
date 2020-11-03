@@ -5,17 +5,17 @@ use std::thread;
 
 
 /** plot: split datasets up by plot, and call plotting routine for each */
-pub fn plot( data : Vec< Dataset > )
+pub fn plot( data : Vec< Dataset >, verbose : bool )
 {
-    fn plot_dataset( dataset : Vec< Dataset > )
+    fn plot_dataset( dataset : Vec< Dataset >, verbose : bool )
     {
         let mut fg = gnuplot::Figure::new();
 
         let highest : u8 = highest_dimension( &dataset );
         if highest == 2 {
-            plot2d( &mut fg, dataset );
+            plot2d( &mut fg, dataset, verbose );
         } else if highest == 3 {
-            plot3d( &mut fg, dataset );
+            plot3d( &mut fg, dataset, verbose );
         }
         
         match fg.show() {
@@ -53,7 +53,7 @@ pub fn plot( data : Vec< Dataset > )
     for plt in separate_by_plot( data ) {
         children.push(
             thread::spawn( move || {
-                plot_dataset( plt );
+                plot_dataset( plt, verbose );
             } )
         );
     }
@@ -89,7 +89,7 @@ fn highest_dimension( datasets : &Vec< Dataset > ) -> u8
 }
 
 
-fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
+fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset >, verbose : bool )
 {
     fn new_2d_axes( fg        : &mut gnuplot::Figure,
                     plot_opts : Option< Vec< (String, String) > > )
@@ -104,7 +104,9 @@ fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
     let ax = new_2d_axes( fg, get_plot_options( &data ) );
 
     for d in data {
-        eprintln!( "Got dataset with columns: {:?}", d.columns );
+        if verbose {
+            eprintln!( "Got dataset with columns: {:?}", d.columns );
+        }
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
         match &*get_plot_type( &d.style ) {
@@ -123,7 +125,7 @@ fn plot2d( fg : &mut gnuplot::Figure , data : Vec < Dataset > )
 }
 
 
-fn plot3d( fg : &mut gnuplot::Figure , data : Vec< Dataset > )
+fn plot3d( fg : &mut gnuplot::Figure , data : Vec< Dataset >, verbose : bool )
 {
     fn new_3d_axes( fg        : &mut gnuplot::Figure,
                     plot_opts : Option< Vec< (String, String) > > )
@@ -139,7 +141,9 @@ fn plot3d( fg : &mut gnuplot::Figure , data : Vec< Dataset > )
     let ax = new_3d_axes( fg, get_plot_options( &data ) );
 
     for d in data {
-        eprintln!( "Got dataset with columns: {:?}", d.columns );
+        if verbose {
+            eprintln!( "Got dataset with columns: {:?}", d.columns );
+        }
         let xs = to_vector( &d.points, 0 );
         let ys = to_vector( &d.points, 1 );
         let zs = to_vector( &d.points, 2 );
