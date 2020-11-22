@@ -13,6 +13,8 @@ csv-plot: plot data on stdin using gnuplot
 /*
 TODO:
 - add binary data support
+- add support for giving only y data (i.e. create artificial x data)
+- add support for a single column of x-data across multiple datasets
  */
 
 
